@@ -4,6 +4,7 @@
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 

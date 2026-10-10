@@ -1,8 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
@@ -14,9 +16,9 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(
-    null
-  );
+  const [socialLoading, setSocialLoading] = useState<
+    "google" | "github" | null
+  >(null);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -27,70 +29,109 @@ export default function SignupPage() {
     const cleanEmail = email.trim();
 
     if (!cleanName) {
-      setError("তোমার নাম লিখো।");
+      const message = "তোমার নাম লিখো।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password.length < 8) {
-      setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      const message = "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password.length > 128) {
-      setError("পাসওয়ার্ড ১২৮ অক্ষরের বেশি হতে পারবে না।");
+      const message = "পাসওয়ার্ড ১২৮ অক্ষরের বেশি হতে পারবে না।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("দুটি পাসওয়ার্ড মিলছে না।");
+      const message = "দুটি পাসওয়ার্ড মিলছে না।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     setLoading(true);
 
     try {
-      const { data, error: authError } = await authClient.signUp.email({
-        name: cleanName,
-        email: cleanEmail,
-        password,
-        callbackURL: "/",
-      });
+      const { data, error: authError } =
+        await authClient.signUp.email({
+          name: cleanName,
+          email: cleanEmail,
+          password,
+          callbackURL: "/",
+        });
 
       if (authError) {
-        setError(
-          authError.message || "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করো।"
-        );
+        const message =
+          authError.message ||
+          "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করো।";
+
+        setError(message);
+        toast.error(message);
         return;
       }
 
       if (data) {
+        toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
         router.push("/");
         router.refresh();
       } else {
-        setError("রেজিস্ট্রেশন সম্পন্ন হয়েছে কি না নিশ্চিত হওয়া যায়নি। আবার চেষ্টা করার আগে সাইন ইন করে দেখো।");
+        const message =
+          "রেজিস্ট্রেশন নিশ্চিত করা যায়নি। আবার চেষ্টা করো।";
+
+        setError(message);
+        toast.error(message);
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setError("সার্ভারের সঙ্গে যোগাযোগ করা যায়নি। পরে আবার চেষ্টা করো।");
+
+      const message =
+        "সার্ভারের সঙ্গে যোগাযোগ করা যায়নি। পরে আবার চেষ্টা করো।";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSocialSignup(provider: "google" | "github") {
+  async function handleSocialSignup(
+    provider: "google" | "github"
+  ) {
     setError("");
     setSocialLoading(provider);
 
     try {
-      await authClient.signIn.social({
-        provider,
-        callbackURL: "/",
-      });
+      const { error: authError } =
+        await authClient.signIn.social({
+          provider,
+          callbackURL: "/",
+        });
+
+      if (authError) {
+        const message = `${
+          provider === "google" ? "Google" : "GitHub"
+        } দিয়ে সাইন আপ করা যায়নি। কনফিগারেশন পরীক্ষা করো।`;
+
+        setError(message);
+        toast.error(message);
+        setSocialLoading(null);
+      }
     } catch (err) {
       console.error(`${provider} signup error:`, err);
-      setError(
-        `${provider === "google" ? "Google" : "GitHub"} দিয়ে সাইন আপ করা যায়নি। কনফিগারেশন পরীক্ষা করো।`
-      );
+
+      const message = `${
+        provider === "google" ? "Google" : "GitHub"
+      } দিয়ে সাইন আপ করা যায়নি। আবার চেষ্টা করো।`;
+
+      setError(message);
+      toast.error(message);
       setSocialLoading(null);
     }
   }
@@ -98,9 +139,10 @@ export default function SignupPage() {
   const busy = loading || socialLoading !== null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f0f5f0] px-4 py-10">
+    <main className="flex min-h-screen items-start justify-center bg-[#f0f5f0] px-4 pt-5 pb-8 sm:pt-8">
       <div className="w-full max-w-[456px]">
-        <div className="mb-7 text-center">
+        {/* Heading */}
+        <div className="mb-5 text-center sm:mb-6">
           <h1 className="text-3xl font-extrabold tracking-tight text-[#202b22] sm:text-4xl">
             অ্যাকাউন্ট তৈরি করুন
           </h1>
@@ -110,8 +152,10 @@ export default function SignupPage() {
           </p>
         </div>
 
+        {/* Signup Card */}
         <div className="rounded-[20px] border border-[#dce6de] bg-[#fbfdfb] p-5 shadow-sm sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <div>
               <label
                 htmlFor="name"
@@ -134,6 +178,7 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -156,6 +201,7 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -182,15 +228,23 @@ export default function SignupPage() {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword((current) => !current)}
+                  onClick={() =>
+                    setShowPassword((current) => !current)
+                  }
+                  disabled={busy}
                   className="absolute inset-y-0 right-3 text-xs font-semibold text-green-800"
-                  aria-label={showPassword ? "পাসওয়ার্ড লুকাও" : "পাসওয়ার্ড দেখাও"}
+                  aria-label={
+                    showPassword
+                      ? "পাসওয়ার্ড লুকান"
+                      : "পাসওয়ার্ড দেখুন"
+                  }
                 >
                   {showPassword ? "লুকান" : "দেখুন"}
                 </button>
               </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -213,6 +267,7 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Error */}
             {error && (
               <p
                 role="alert"
@@ -222,54 +277,88 @@ export default function SignupPage() {
               </p>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={busy}
               className="flex min-h-11 w-full items-center justify-center rounded-lg bg-green-700 py-3 font-bold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
+              {loading
+                ? "অ্যাকাউন্ট তৈরি হচ্ছে..."
+                : "অ্যাকাউন্ট তৈরি করুন"}
             </button>
           </form>
 
+          {/* Divider */}
           <div className="my-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-gray-200" />
             <span className="text-sm text-gray-500">অথবা</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          {/* Social Signup */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* Google */}
             <button
               type="button"
               onClick={() => handleSocialSignup("google")}
               disabled={busy}
               className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 px-2 text-sm font-medium text-[#202b22] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" />
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 38.02 46.98 31.8 46.98 24.55Z" />
-                <path fill="#FBBC05" d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.19a24 24 0 0 0 0 21.56l7.98-6.19Z" />
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" />
+              <svg
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0"
+              >
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 38.02 46.98 31.8 46.98 24.55Z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.19a24 24 0 0 0 0 21.56l7.98-6.19Z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
+                />
               </svg>
+
               <span>
-                {socialLoading === "google" ? "অপেক্ষা করো..." : "Google দিয়ে সাইন আপ"}
+                {socialLoading === "google"
+                  ? "অপেক্ষা করুন..."
+                  : "Google দিয়ে সাইন আপ"}
               </span>
             </button>
 
+            {/* GitHub */}
             <button
               type="button"
               onClick={() => handleSocialSignup("github")}
               disabled={busy}
               className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 px-2 text-sm font-medium text-[#202b22] transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0 fill-current"
+              >
                 <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.1c-3.1.68-3.76-1.32-3.76-1.32-.5-1.29-1.24-1.63-1.24-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15.99 1.69 2.6 1.2 3.23.92.1-.72.39-1.2.7-1.48-2.47-.28-5.06-1.24-5.06-5.5 0-1.22.44-2.21 1.15-2.99-.12-.28-.5-1.42.11-2.95 0 0 .94-.3 3.05 1.14a10.6 10.6 0 0 1 5.55 0c2.11-1.44 3.04-1.14 3.04-1.14.61 1.53.23 2.67.12 2.95.71.78 1.14 1.77 1.14 2.99 0 4.27-2.6 5.22-5.08 5.49.4.35.75 1.02.75 2.06v3.09c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
               </svg>
+
               <span>
-                {socialLoading === "github" ? "অপেক্ষা করো..." : "GitHub দিয়ে সাইন আপ"}
+                {socialLoading === "github"
+                  ? "অপেক্ষা করুন..."
+                  : "GitHub দিয়ে সাইন আপ"}
               </span>
             </button>
           </div>
 
+          {/* Signin Link */}
           <p className="mt-5 text-center text-sm text-gray-500">
             অ্যাকাউন্ট আছে?{" "}
             <Link

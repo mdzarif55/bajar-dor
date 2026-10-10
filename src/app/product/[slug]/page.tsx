@@ -1,8 +1,10 @@
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound,redirect } from "next/navigation";
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
+import { auth } from "@/lib/auth";
 
 const API_URL =
   "https://api.abcz.workers.dev/api/bazardor/products";
@@ -131,6 +133,16 @@ async function ProductDetailsContent({
   params,
 }: PageProps) {
   const { slug } = await params;
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  // Login না থাকলে Sign In page-এ পাঠাবে
+  if (!session) {
+    redirect(`/signin?callbackURL=${encodeURIComponent(`/product/${slug}`)}`);
+  }
+
   const products = await getProducts();
 
   const product = products.find((item) => item.slug === slug);
