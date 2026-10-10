@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface Product {
   id: number;
   slug: string;
@@ -39,6 +41,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isSame = changeDirection === "same";
 
   return (
+    <Link href={`/product/${product.slug}`}>
     <article className="rounded-[20px] border border-[#dce5dd] bg-[#fbfdfb] p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
       {/* Product Info */}
       <div className="flex items-center gap-3">
@@ -93,6 +96,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </span>
       </div>
-    </article>
+    </article></Link>
   );
 }

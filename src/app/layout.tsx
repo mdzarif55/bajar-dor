@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Marquee from "./components/Marquee";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,29 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-screen bg-[#f0f5f1]">
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              borderRadius: "12px",
+              background: "#166534",
+              color: "#fff",
+            },
+            success: {
+              iconTheme: {
+                primary: "#22c55e",
+                secondary: "#fff",
+              },
+            },
+            error: {
+              style: {
+                background: "#dc2626",
+                color: "#fff",
+              },
+            },
+          }}
+        />
         <Navbar />
         <Marquee />
         <main>{children}</main>
