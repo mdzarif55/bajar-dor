@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 
 const API_URL =
-  "https://api.abcz.workers.dev/api/bazardor/products";
+  "https://openapi.programming-hero.com/api/bazardor/products";
 
 interface MarketPrice {
   market: string;
@@ -22,7 +22,7 @@ interface Product {
   nameBn: string;
   category: string;
   categoryNameBn: string;
-  categoryIcon: string;
+  categoryIcon?: string;
   unit: string;
   image: string;
   today: number;

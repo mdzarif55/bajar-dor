@@ -1,3 +1,4 @@
+
 import { Suspense } from "react";
 import ProductCard from "@/app/components/ProductCard";
 
@@ -6,8 +7,8 @@ interface Product {
   slug: string;
   nameBn: string;
   category: string;
-  categoryNameBn: string;
-  categoryIcon: string;
+  categoryNameBn?: string;
+  categoryIcon?: string;
   image: string;
   unit: string;
   today: number;
@@ -23,6 +24,9 @@ interface CategoryPageProps {
     categoryId: string;
   }>;
 }
+
+const API_URL =
+  "https://openapi.programming-hero.com/api/bazardor/products";
 
 function CategoryLoading() {
   return (
@@ -49,26 +53,45 @@ function CategoryLoading() {
 async function CategoryContent({ params }: CategoryPageProps) {
   const { categoryId } = await params;
 
-  const res = await fetch(
-    `https://api.abcz.workers.dev/api/bazardor/products?category=${encodeURIComponent(categoryId)}`,
-    { next: { revalidate: 300 } }
-  );
+  let products: Product[] = [];
 
-  if (!res.ok) {
+  try {
+    const res = await fetch(
+      `${API_URL}?category=${encodeURIComponent(categoryId)}`,
+      { next: { revalidate: 300 } }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Products API error: ${res.status}`);
+    }
+
+    const result: unknown = await res.json();
+
+    let items: unknown[] = [];
+
+    if (Array.isArray(result)) {
+      items = result;
+    } else if (
+      result !== null &&
+      typeof result === "object" &&
+      "data" in result &&
+      Array.isArray(result.data)
+    ) {
+      items = result.data;
+    }
+
+    products = items as Product[];
+  } catch (error) {
+    console.error("Category products fetch failed:", error);
+
     return (
       <main className="min-h-screen bg-[#f6f9f5] p-8 text-center">
         <p className="text-red-600">
-          পণ্যের তথ্য লোড করা যায়নি। পরে আবার চেষ্টা করো।
+          পণ্যের তথ্য লোড করা যায়নি। কিছুক্ষণ পর আবার চেষ্টা করো।
         </p>
       </main>
     );
   }
-
-  const data = await res.json();
-
-  const products: Product[] = Array.isArray(data)
-    ? data
-    : data.data ?? [];
 
   const categoryName = products[0]?.categoryNameBn ?? "পণ্য";
   const categoryIcon = products[0]?.categoryIcon ?? "🛒";
@@ -95,7 +118,12 @@ async function CategoryContent({ params }: CategoryPageProps) {
         {products.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                product={{
+                  ...product,
+                  categoryIcon: product.categoryIcon ?? "🛒",
+                }}
+              />
             ))}
           </div>
         ) : (

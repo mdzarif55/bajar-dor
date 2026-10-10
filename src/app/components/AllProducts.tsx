@@ -1,86 +1,83 @@
+
 "use client";
 
 import { useState } from "react";
 import ProductCard from "./ProductCard";
 
 type Product = {
-    id: number;
-    slug: string;
-    nameBn: string;
-    categoryIcon: string;
-    image: string;
-    unit: string;
-    today: number;
-    change?: {
-        dir: string;
-        pct: number;
-    };
+  id: number;
+  slug: string;
+  nameBn: string;
+  categoryIcon: string;
+  image: string;
+  unit: string;
+  today: number;
+  change?: {
+    dir: "up" | "down" | "same";
+    pct: number;
+  };
 };
 
 export default function AllProducts({
-    products,
+  products,
 }: {
-    products: Product[];
+  products: Product[];
 }) {
-    const [sortOrder, setSortOrder] = useState("default");
+  const [sortOrder, setSortOrder] = useState("default");
 
-    const sortedProducts = [...products].sort((a, b) => {
-        if (sortOrder === "low-high") {
-            return a.today - b.today;
-        }
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortOrder === "low-high") {
+      return a.today - b.today;
+    }
 
-        if (sortOrder === "high-low") {
-            return b.today - a.today;
-        }
+    if (sortOrder === "high-low") {
+      return b.today - a.today;
+    }
 
-        return 0;
-    });
+    return 0;
+  });
 
-    return (
-        <section>
-            {/* Heading and filter */}
-            <div className="mb-6 flex items-end justify-between gap-3">
-                <div>
-                    <h2 className="text-2xl font-bold text-[#202b22]">
-                        সব পণ্য
-                    </h2>
+  return (
+    <section>
+      {/* Heading and filter */}
+      <div className="mb-6 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-[#202b22]">
+            সব পণ্য
+          </h2>
 
-                    <p className="mt-4 text-sm text-gray-500">
-                        মোট {products.length.toLocaleString("bn-BD")}টি পণ্য দেখানো হচ্ছে
-                    </p>
-                </div>
+          <p className="mt-4 text-sm text-gray-500">
+            মোট {products.length.toLocaleString("bn-BD")}টি পণ্য দেখানো হচ্ছে
+          </p>
+        </div>
 
-                <div className="flex shrink-0 items-center gap-2">
-                    <label
-                        htmlFor="sort"
-                        className="text-sm text-gray-600"
-                    >
-                        সাজান
-                    </label>
+        <div className="flex shrink-0 items-center gap-2">
+          <label htmlFor="sort" className="text-sm text-gray-600">
+            সাজান
+          </label>
 
-                    <select
-                        id="sort"
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                        className="select select-bordered h-10 min-h-10 rounded-xl border-2 border-[#55aa69] bg-[#fbfdfb] text-sm text-[#202b22] outline-none"
-                    >
-                        <option value="default">ডিফল্ট</option>
-                        <option value="low-high">দাম: কম থেকে বেশি</option>
-                        <option value="high-low">দাম: বেশি থেকে কম</option>
-                    </select>
-                </div>
-            </div>
+          <select
+            id="sort"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="select select-bordered h-10 min-h-10 rounded-xl border-2 border-[#55aa69] bg-[#fbfdfb] text-sm text-[#202b22] outline-none"
+          >
+            <option value="default">ডিফল্ট</option>
+            <option value="low-high">দাম: কম থেকে বেশি</option>
+            <option value="high-low">দাম: বেশি থেকে কম</option>
+          </select>
+        </div>
+      </div>
 
-            {/* Product cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {sortedProducts.map((product) => (
-                    <ProductCard key={product.id} product={product}/>
-                ))}
-            </div>
-        </section>
-    );
+      {/* Product cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {sortedProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </section>
+  );
 }
-
 
 
 
