@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import NavLinks from "./NavLinks";
 import DateDisplay from "./DateDisplay";
+import UserInfo from "./UserInfo";
 
 const Navbar = () => {
   return (
@@ -20,32 +22,23 @@ const Navbar = () => {
               <span className="block whitespace-nowrap text-2xl font-extrabold">
                 বাজার দর
               </span>
-
               <span className="mt-1 block whitespace-nowrap text-sm text-gray-500">
                 <DateDisplay />
               </span>
             </span>
           </Link>
 
-          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-5">
-            <Link
-              href="/signin"
-              className="btn btn-ghost btn-sm font-bold sm:btn-md"
-            >
-              সাইন ইন
-            </Link>
-
-            <Link
-              href="/signup"
-              className="btn btn-sm rounded-xl border-0 bg-green-700 px-4 font-bold text-white hover:bg-green-800 sm:btn-md sm:px-5"
-            >
-              সাইন আপ
-            </Link>
-          </div>
+          <UserInfo/>
         </nav>
       </div>
 
-      <NavLinks />
+      <Suspense
+        fallback={
+          <nav className="h-14 border-b border-gray-200 bg-base-100" />
+        }
+      >
+        <NavLinks />
+      </Suspense>
     </header>
   );
 };
