@@ -1,5 +1,8 @@
+"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Category {
   id: string;
@@ -8,48 +11,77 @@ interface Category {
   icon: string;
 }
 
-const NavLinks = async () => {
-  try {
-    const res = await fetch(
-      "https://api.abcz.workers.dev/api/bazardor/categories",
-      {
-        next: { revalidate: 3600 },
-      }
-    );
+export default function NavLinks() {
+  const pathname = usePathname();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch categories: ${res.status}`);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchCategories() {
+      try {
+        const res = await fetch(
+          "https://api.abcz.workers.dev/api/bazardor/categories"
+        );
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch categories: ${res.status}`);
+        }
+
+        const data: Category[] = await res.json();
+
+        if (!cancelled) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Category fetch error:", error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     }
 
-    const categories: Category[] = await res.json();
+    fetchCategories();
 
-    return (
-      <nav className="w-full bg-base-100 max-w-7xl mx-auto">
-        <div className="mx-auto max-w-[1540px] overflow-x-auto px-4 sm:px-8 lg:px-12">
-          <div className="flex w-max items-center gap-7 py-5 sm:gap-9 lg:gap-11">
-            {categories.map((category) => (
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <nav className="mx-auto w-full max-w-7xl border-b border-gray-200 bg-base-100">
+      <div className="overflow-x-auto px-4 sm:px-8 lg:px-12">
+        <div className="flex w-max items-center gap-3 py-3 sm:gap-4">
+          {loading && (
+            <span className="px-3 py-2 text-sm text-gray-500">
+              ক্যাটাগরি লোড হচ্ছে...
+            </span>
+          )}
+
+          {categories.map((category) => {
+            const href = `/category/${category.slug}`;
+            const isActive = pathname === href;
+
+            return (
               <Link
                 key={category.id}
-                href={`/category/${category.slug}`}
-                className="flex shrink-0 items-center whitespace-nowrap font-semibold text-sm text-base-content transition-colors duration-200 hover:text-green-700"
+                href={href}
+                aria-current={isActive ? "page" : undefined}
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors duration-200 ${
+                  isActive
+                    ? "bg-green-700 text-white"
+                    : "text-base-content hover:bg-green-50 hover:text-green-800"
+                }`}
               >
                 <span aria-hidden="true">{category.icon}</span>
                 <span>{category.nameBn}</span>
               </Link>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </nav>
-    );
-  } catch (error) {
-    console.error("Category fetch error:", error);
-
-    return (
-      <nav className="border-b border-base-300 px-4 py-4 text-sm text-base-content/60">
-        ক্যাটাগরি লোড করা যায়নি।
-      </nav>
-    );
-  }
-};
-
-export default NavLinks;
+      </div>
+    </nav>
+  );
+}

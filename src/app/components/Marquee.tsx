@@ -18,8 +18,10 @@ interface Product {
 
 const Marquee = async () => {
   const res = await fetch(
-    "https://api.abcz.workers.dev/api/bazardor/products",
-    
+    "https://api.abcz.workers.dev/api/bazardor/products", {
+    next: { revalidate: 300 },
+  }
+
   );
 
   if (!res.ok) {

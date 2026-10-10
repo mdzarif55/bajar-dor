@@ -1,23 +1,12 @@
-
 import Link from "next/link";
 import NavLinks from "./NavLinks";
-
+import DateDisplay from "./DateDisplay";
 
 const Navbar = () => {
-  const date = new Date().toLocaleDateString("bn-BD", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Dhaka",
-  });
-
   return (
     <header className="sticky top-0 z-50 w-full bg-base-100 text-base-content">
-      {/* Top Navbar */}
       <div className="w-full border-b border-gray-200 bg-base-100">
-        <nav className="mx-auto flex min-h-[92px] w-full max-w-7xl items-center justify-between gap-3 px- sm:px-8 lg:px-12">
-          {/* Logo and Website Name */}
+        <nav className="mx-auto flex min-h-[92px] w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-8 lg:px-12">
           <Link
             href="/"
             className="flex shrink-0 items-center gap-3"
@@ -33,12 +22,11 @@ const Navbar = () => {
               </span>
 
               <span className="mt-1 block whitespace-nowrap text-sm text-gray-500">
-                {date}
+                <DateDisplay />
               </span>
             </span>
           </Link>
 
-          {/* Authentication Buttons */}
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-5">
             <Link
               href="/signin"
@@ -57,11 +45,7 @@ const Navbar = () => {
         </nav>
       </div>
 
-      {/* Category Navigation */}
       <NavLinks />
-
-      {/* Scrolling Market Prices */}
-      
     </header>
   );
 };
