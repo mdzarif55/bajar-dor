@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Marquee from "./components/Marquee";
 import { Toaster } from "react-hot-toast";
+import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,6 +59,7 @@ export default function RootLayout({
         <Navbar />
         <Marquee />
         <main>{children}</main>
+        <Footer/>
       </body>
     </html>
   );
