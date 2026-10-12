@@ -40,7 +40,7 @@ const Marquee = async () => {
         <MarqueeText
           className="py-0"
           direction="right"
-          duration={25}
+          duration={15}
         >
           {products.map((product) => {
             const isUp = product.change.dir === "up";
